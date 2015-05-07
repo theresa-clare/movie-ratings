@@ -1,0 +1,28 @@
+<!-- Registration page should:
+    a) add a user, email, and password to your db
+    b) not allow a user to add a duplicate email -->
+
+{% extends 'base.html' %}
+{% block content %}
+
+<h1>Registration Form:</h1>
+
+<form action="register" method="POST">
+
+<label>Email:<input type="email" name="email"></label>
+<br>
+<br>
+<label>Password:<input type="password" name="password"></label>
+<br>
+<br>
+<label>Age:<input type="number" name="age"></label>
+<br>
+<br>
+<label>Zipcode:<input type="text" name="zipcode"></label>
+<br>
+<br>
+<input type="submit" value="Register">
+
+</form>
+
+{% endblock %}
