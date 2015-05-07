@@ -25,42 +25,52 @@ def index():
     return render_template("homepage.html")
 
 
+@app.route('/login', methods=['GET'])
+def login_form():
+    """Go to login_form.html"""
+
+    return render_template("login_form.html")
+
+
+@app.route('/login', methods=['POST'])
+def login():
+    """Log in to session if user is in the database."""
+
+    email = request.form['email']
+    password = request.form['password']
+    user = User.query.filter_by(email=email).first()
+
+    if not user:
+        flash("No identical user found.")
+        return redirect("/login")
+    elif user.password != password:
+        flash("Password is incorrect.")
+        return redirect("/login")
+
+    session["user_id"] = user.user_id
+    flash("You are now logged in!")
+
+    return redirect("/")
+
+
+@app.route('/logout')
+def logout():
+    """Log out of session."""
+
+    del session["user_id"]
+    flash("You are now logged out!")
+
+    return redirect("/")
+
+
 @app.route("/users")
 def user_list():
     """Show list of users."""
 
     users = User.query.all()
+
     return render_template("user_list.html", users=users)
 
-
-@app.route('/login_form')
-def login_form():
-    return render_template("login_form.html")
-
-
-@app.route('/login', methods=["POST"])
-def login():
-    email = request.form.get("email")
-    password = request.form.get("password")
-
-    try:
-        user = User.query.filter_by(email=email).one()
-    except:
-        user = None
-
-    if user:
-        session['user.email'] = user.password
-        flash("You were successfully logged in!")
-        return redirect("/homepage")
-    else:
-        return render_template("registration_form.html", email=email, password=password) 
-
-
-@app.route('/logout')
-def logout_user():
-    # del session[]
-
-    return redirect("homepage.html")
 
 
 if __name__ == "__main__":

@@ -2,19 +2,23 @@
 <html>
 <head>
   <title>Ratings</title>
-  <a href="/login_form">Log In></a> 
 </head>
 
 <body> 
     
   Ratings
-  <hr>
 
-  {% with messages = get_flashed_messages() %}
-      {% for message in messages %}
-          <div class="alert alert-warning">{{ message }}</div>
-      {% endfor %}
-  {% endwith %}
+    {% if "user_id" in session %}
+        <a href="/logout">Logout</a>
+    {% else %}
+        <a href="/login">Login</a>
+    {% endif %}
+
+<hr>
+
+    {% for flash in get_flashed_messages() %}
+      {{ flash }}
+    {% endfor %}
 
   {% block content %} put your content here {% endblock %}
 
