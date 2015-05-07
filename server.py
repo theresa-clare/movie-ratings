@@ -34,7 +34,7 @@ def login_form():
 
 @app.route('/login', methods=['POST'])
 def login():
-    """Log in to session if user is in the database."""
+    """Log user in to session if user is in the database."""
 
     email = request.form['email']
     password = request.form['password']
@@ -55,10 +55,37 @@ def login():
 
 @app.route('/logout')
 def logout():
-    """Log out of session."""
+    """Logs user out of session."""
 
     del session["user_id"]
     flash("You are now logged out!")
+
+    return redirect("/")
+
+
+@app.route('/register', methods=['GET'])
+def registration_form():
+    """Form for user to sign up for website."""
+
+    return render_template("registration_form.html")
+
+
+@app.route('/register', methods=['POST'])
+def register_now():
+    """Add user to registration database."""
+
+    email = request.form["email"]
+    password = request.form["password"]
+    age = int(request.form["age"])
+    zipcode = request.form["zipcode"]
+
+    # Make new user with form variable information
+    new_user = User(email=email, password=password, age=age, zipcode=zipcode)
+
+    # Add user to database
+    db.session.add(new_user)
+    db.session.commit()
+    flash("User %s has been added." %email)
 
     return redirect("/")
 
