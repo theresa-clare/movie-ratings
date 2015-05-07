@@ -38,7 +38,7 @@ def login():
 
     email = request.form['email']
     password = request.form['password']
-    user = User.query.filter_by(email=email).first()
+    user = User.query.filter_by(email = email).first()
 
     if not user:
         flash("No identical user found.")
@@ -80,7 +80,7 @@ def register_now():
     zipcode = request.form["zipcode"]
 
     # Make new user with form variable information
-    new_user = User(email=email, password=password, age=age, zipcode=zipcode)
+    new_user = User(email = email, password = password, age = age, zipcode = zipcode)
 
     # Add user to database
     db.session.add(new_user)
@@ -96,7 +96,8 @@ def user_list():
 
     users = User.query.all()
 
-    return render_template("user_list.html", users=users)
+    return render_template("user_list.html", users = users)
+
 
 @app.route("/users/<int:user_id>")
 def user_page(user_id):
@@ -104,7 +105,60 @@ def user_page(user_id):
 
     user = User.query.get(user_id)
 
-    return render_template("user.html", user=user)
+    return render_template("user.html", user = user)
+
+
+@app.route("/movies")
+def movies_list():
+    """Show list of movies in alphabetical order."""
+
+    movies = Movie.query.order_by('title').all()
+
+    return render_template("movie_list.html", movies = movies)
+
+
+@app.route("/movies/<int:movie_id>", methods=["GET", "POST"])
+def movie_about(movie_id):
+    """Show details about a movie."""
+
+    movie = Movie.query.get(movie_id)
+    user_id = session.get("user_id")
+
+    if user_id: #If user is logged in already, allow user to add or updating an existing rating
+        user_rating = Rating.query.filter_by(movie_id = movie_id, user_id = user_id).first()
+    else:
+        user_rating = None   
+
+    return render_template("movie.html", user_rating = user_rating, movie = movie)
+
+
+@app.route("/movies/<int:movie_id>", methods=["POST"])
+def rate_movie(movie_id):
+    """Allows user who is logged in to rate movie.
+    Checks if user already rated the movie and replaces old rating.
+    If the rating is new, rating is added to the database."""
+
+    score = int(request.form["score"])
+    user_id = session.get("user_id")
+
+    if not user_id:
+        raise Exception("No user is currently logged in.")
+
+    # Check to see if user already rated the movie
+    rating = Rating.query.filter_by(user_id=user_id, movie_id=movie_id).first()
+
+    if rating:  # If the rating exists, replace rating
+        rating.score = score
+        flash("Rating has been updated.")
+    else:       # Rating does not exist. Add rating to database
+        rating = Rating(user_id = user_id, movie_id = movie_id, score = score)
+        flash("Rating has been added! Yay!")
+        db.session.add(rating)
+
+    db.session.commit()
+
+    return redirect("/movies/%s" % movie_id)
+
 
 if __name__ == "__main__":
     # We have to set debug=True here, since it has to be True at the point
